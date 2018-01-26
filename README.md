@@ -1,2 +1,3 @@
 # php-mailing-api
-Light weight API to do emails
+
+Very light weight API dedicated to email sending.
