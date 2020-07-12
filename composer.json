@@ -1,15 +1,25 @@
 {
-	"name" : "lucinda/mailing",
-	"license" : "MIT",
-	"authors" : [{
-			"name" : "Lucian Popescu",
-			"email" : "lucian.gabriel.popescu@gmail.com",
-			"role" : "Developer"
-		}
-	],
+    "name": "lucinda/mailing",
 	"description" : "Object oriented layer on top of PHP native mail function",
 	"type" : "project",
-	"keywords" : [
-		"mailer"
-	]
+    "homepage": "https://github.com/aherne/php-mailing-api",
+    "keywords": ["mailing", "oop"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Lucian Gabriel Popescu",
+            "email": "lucian.gabriel.popescu@gmail.com"
+        }
+    ],
+    "autoload": {
+    	"psr-4": {
+        	"Lucinda\\Mail\\": "src/"
+    	}
+    },
+    "require": {
+        "php": "^7.1"
+    },
+    "require-dev": {
+    	"lucinda/unit-testing": "^1.0"
+    }
 }

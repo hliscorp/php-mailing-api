@@ -1,11 +1,9 @@
 <?php
-require_once("MailAddress.php");
-require_once("MailException.php");
-
+namespace Lucinda\Mail;
 /**
  * Encapsulates mail sending on top of PHP mail function
  */
-class MailMessage
+class Message
 {
     private $subject;
     private $to = array();
@@ -26,7 +24,8 @@ class MailMessage
      * @param string $subject Subject of email.
      * @param string $body Email body.
      */
-    public function __construct($subject, $body) {
+    public function __construct(string $subject, string $body)
+    {
         $this->subject = $subject;
         $this->message = $body;
     }
@@ -34,61 +33,61 @@ class MailMessage
     /**
      * Adds address to send mail to
      *
-     * @param string $email Value of email address.
-     * @param string $name Name of person who holds email address (optional).
+     * @param Address $address Value of email and optional name of person email belongs to
      */
-    public function addTo($email, $name=null) {
-        $this->to[] = new MailAddress($email, $name);
+    public function addTo(Address $address): void
+    {
+        $this->to[] = $address;
     }
 
     /**
      * Sets sender's address.
      *
-     * @param string $email Value of email address.
-     * @param string $name Name of person who holds email address (optional).
+     * @param Address $address Value of email and optional name of person email belongs to
      */
-    public function setFrom($email, $name=null) {
-        $this->from = new MailAddress($email, $name);
+    public function setFrom(Address $address): void
+    {
+        $this->from = $address;
     }
 
     /**
      * Sets message submitter, in case mail agent is sending on behalf of someone else.
      *
-     * @param string $email Value of email address.
-     * @param string $name Name of person who holds email address (optional).
+     * @param Address $address Value of email and optional name of person email belongs to
      */
-    public function setSender($email, $name=null) {
-        $this->sender = new MailAddress($email, $name);
+    public function setSender(Address $address): void
+    {
+        $this->sender = $address;
     }
 
     /**
      * Sets address recipients must use on replies to message.
      *
-     * @param string $email Value of email address.
-     * @param string $name Name of person who holds email address (optional).
+     * @param Address $address Value of email and optional name of person email belongs to
      */
-    public function setReplyTo($email, $name=null) {
-        $this->replyTo = new MailAddress($email, $name);
+    public function setReplyTo(Address $address): void
+    {
+        $this->replyTo = $address;
     }
 
     /**
      * Adds address to publicly send a copy of message to
      *
-     * @param string $email Value of email address.
-     * @param string $name Name of person who holds email address (optional).
+     * @param Address $address Value of email and optional name of person email belongs to
      */
-    public function addCC($email, $name=null) {
-        $this->cc[] = new MailAddress($email, $name);
+    public function addCC(Address $address): void
+    {
+        $this->cc[] = $address;
     }
 
     /**
      * Adds address to discreetly send a copy of message to (invisible to others)
      *
-     * @param string $email Value of email address.
-     * @param string $name Name of person who holds email address (optional).
+     * @param Address $address Value of email and optional name of person email belongs to
      */
-    public function addBCC($email, $name=null) {
-        $this->bcc[] = new MailAddress($email, $name);
+    public function addBCC(Address $address): void
+    {
+        $this->bcc[] = $address;
     }
 
     /**
@@ -97,7 +96,8 @@ class MailMessage
      * @param string $contentType
      * @param string $charset
      */
-    public function setContentType($contentType, $charset) {
+    public function setContentType(string $contentType, string $charset): void
+    {
         $this->contentType = $contentType;
         $this->charset = $charset;
     }
@@ -108,7 +108,8 @@ class MailMessage
      * @param string $name Value of header name.
      * @param string $value Value of header content.
      */
-    public function addCustomHeader($name, $value) {
+    public function addCustomHeader(string $name, string $value): void
+    {
         $this->customHeaders[] = $name.": ".$value;
     }
 
@@ -117,21 +118,36 @@ class MailMessage
      *
      * @param string $filePath Location of attached file
      */
-    public function addAttachment($filePath) {
-        if(!file_exists($filePath)) throw new MailException("Attached file doesn't exist!");
+    public function addAttachment(string $filePath): void
+    {
+        if (!file_exists($filePath)) {
+            throw new Exception("Attached file doesn't exist!");
+        }
         $this->attachments[] = $filePath;
     }
 
     /**
      * Sends mail to recipients
      */
-    public function send() {
-        if(empty($this->to)) throw new MailException("You must add at least one recipient to mail message!");
+    public function send(): void
+    {
+        if (empty($this->to)) {
+            throw new Exception("You must add at least one recipient to mail message!");
+        }
         
-        // create separator to be used in multipart content (if any)
         $separator = md5(uniqid(time()));
-        
-        // compile headers
+        $result = mail(implode(",",$this->to), $this->subject, $this->getBody($separator), implode("\r\n", $this->getHeaders($separator)));
+        if(!$result) throw new Exception("Send failed!");
+    }
+    
+    /**
+     * Compiles email headers to send
+     * 
+     * @param string $separator Separator to use in case attachments are sent
+     * @return array Headers to send
+     */
+    private function getHeaders(string $separator): array
+    {
         $headers = array();
         if(!empty($this->attachments)) {
             $headers[] = "MIME-Version: 1.0";
@@ -162,8 +178,17 @@ class MailMessage
         if(!empty($this->customHeaders)) {
             $headers = array_merge($headers, $this->customHeaders);
         }
-
-        // compile body
+        return $headers;
+    }
+    
+    /**
+     * Compiles message body to send
+     * 
+     * @param string $separator Separator to use in case attachments are sent
+     * @return string Message body to send.
+     */
+    private function getBody(string $separator): string
+    {
         $body = "";
         if(!empty($this->attachments)) {
             $bodyParts = array();
@@ -187,10 +212,7 @@ class MailMessage
         } else {
             $body = $this->message;
         }
-
-        // send mail
-        $result = mail(implode(",",$this->to), $this->subject, $body, implode("\r\n", $headers));
-        if(!$result) throw new MailException("Send failed!");
+        return $body;
     }
 }
 

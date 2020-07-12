@@ -1,2 +1,2 @@
 <?php
-require_once("src/MailMessage.php");
+require_once("src/Message.php");
