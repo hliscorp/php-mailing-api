@@ -4,13 +4,14 @@ namespace Lucinda\Mail;
 /**
  * Class that encapsulates an email address along with its optional owner name
  */
-class Address {
+class Address
+{
     private $email;
     private $name;
 
     /**
      * Registers and validates email address along with its optional owner name
-     * 
+     *
      * @param string $email
      * @param string|NULL $name
      * @throws Exception
@@ -26,7 +27,7 @@ class Address {
 
     /**
      * Converts entity to string
-     * 
+     *
      * @return string
      */
     public function __toString(): string

@@ -1,5 +1,6 @@
 <?php
 namespace Lucinda\Mail;
+
 /**
  * Encapsulates mail sending on top of PHP mail function
  */
@@ -136,46 +137,48 @@ class Message
         }
         
         $separator = md5(uniqid(time()));
-        $result = mail(implode(",",$this->to), $this->subject, $this->getBody($separator), implode("\r\n", $this->getHeaders($separator)));
-        if(!$result) throw new Exception("Send failed!");
+        $result = mail(implode(",", $this->to), $this->subject, $this->getBody($separator), implode("\r\n", $this->getHeaders($separator)));
+        if (!$result) {
+            throw new Exception("Send failed!");
+        }
     }
     
     /**
      * Compiles email headers to send
-     * 
+     *
      * @param string $separator Separator to use in case attachments are sent
      * @return array Headers to send
      */
     private function getHeaders(string $separator): array
     {
         $headers = array();
-        if(!empty($this->attachments)) {
+        if (!empty($this->attachments)) {
             $headers[] = "MIME-Version: 1.0";
             $headers[] = "Content-Type: multipart/mixed; boundary=\"".$separator."\"";
             $headers[] = "Content-Transfer-Encoding: 7bit";
             $headers[] = "This is a MIME encoded message";
         } else {
-            if($this->contentType) {
+            if ($this->contentType) {
                 $headers[] = "MIME-Version: 1.0";
                 $headers[] = "Content-type:".$this->contentType."; charset=\"".$this->charset."\"";
             }
         }
-        if(!empty($this->from)) {
+        if (!empty($this->from)) {
             $headers[] = "From: ".$this->from;
         }
-        if(!empty($this->sender)) {
+        if (!empty($this->sender)) {
             $headers[] = "Sender: ". $this->sender;
         }
-        if(!empty($this->replyTo)) {
+        if (!empty($this->replyTo)) {
             $headers[] = "Reply-To: ".$this->replyTo;
         }
-        if(!empty($this->cc)) {
+        if (!empty($this->cc)) {
             $headers[] = "Cc: ".implode(",", $this->cc);
         }
-        if(!empty($this->bcc)) {
+        if (!empty($this->bcc)) {
             $headers[] = "Bcc: ".implode(",", $this->bcc);
         }
-        if(!empty($this->customHeaders)) {
+        if (!empty($this->customHeaders)) {
             $headers = array_merge($headers, $this->customHeaders);
         }
         return $headers;
@@ -183,14 +186,14 @@ class Message
     
     /**
      * Compiles message body to send
-     * 
+     *
      * @param string $separator Separator to use in case attachments are sent
      * @return string Message body to send.
      */
     private function getBody(string $separator): string
     {
         $body = "";
-        if(!empty($this->attachments)) {
+        if (!empty($this->attachments)) {
             $bodyParts = array();
             
             // add message body
@@ -200,7 +203,7 @@ class Message
             $bodyParts[] = $this->message;
             
             // add attachments
-            foreach($this->attachments as $filePath) {
+            foreach ($this->attachments as $filePath) {
                 $bodyParts[] = "--".$separator;
                 $bodyParts[] = "Content-Type: ".mime_content_type($filePath)."; name=\"".basename($filePath) ."\"";
                 $bodyParts[] = "Content-Transfer-Encoding: base64";
@@ -215,4 +218,3 @@ class Message
         return $body;
     }
 }
-
