@@ -25,7 +25,7 @@ class Message
      * @param string $subject Subject of email.
      * @param string $body Email body.
      */
-    public function __construct(string $subject, string $body)
+    public function __construct($subject, $body)
     {
         $this->subject = $subject;
         $this->message = $body;
@@ -36,7 +36,7 @@ class Message
      *
      * @param Address $address Value of email and optional name of person email belongs to
      */
-    public function addTo(Address $address): void
+    public function addTo(Address $address)
     {
         $this->to[] = $address;
     }
@@ -46,7 +46,7 @@ class Message
      *
      * @param Address $address Value of email and optional name of person email belongs to
      */
-    public function setFrom(Address $address): void
+    public function setFrom(Address $address)
     {
         $this->from = $address;
     }
@@ -56,7 +56,7 @@ class Message
      *
      * @param Address $address Value of email and optional name of person email belongs to
      */
-    public function setSender(Address $address): void
+    public function setSender(Address $address)
     {
         $this->sender = $address;
     }
@@ -66,7 +66,7 @@ class Message
      *
      * @param Address $address Value of email and optional name of person email belongs to
      */
-    public function setReplyTo(Address $address): void
+    public function setReplyTo(Address $address)
     {
         $this->replyTo = $address;
     }
@@ -76,7 +76,7 @@ class Message
      *
      * @param Address $address Value of email and optional name of person email belongs to
      */
-    public function addCC(Address $address): void
+    public function addCC(Address $address)
     {
         $this->cc[] = $address;
     }
@@ -86,7 +86,7 @@ class Message
      *
      * @param Address $address Value of email and optional name of person email belongs to
      */
-    public function addBCC(Address $address): void
+    public function addBCC(Address $address)
     {
         $this->bcc[] = $address;
     }
@@ -97,7 +97,7 @@ class Message
      * @param string $contentType
      * @param string $charset
      */
-    public function setContentType(string $contentType, string $charset): void
+    public function setContentType($contentType, $charset)
     {
         $this->contentType = $contentType;
         $this->charset = $charset;
@@ -109,7 +109,7 @@ class Message
      * @param string $name Value of header name.
      * @param string $value Value of header content.
      */
-    public function addCustomHeader(string $name, string $value): void
+    public function addCustomHeader($name, $value)
     {
         $this->customHeaders[] = $name.": ".$value;
     }
@@ -119,7 +119,7 @@ class Message
      *
      * @param string $filePath Location of attached file
      */
-    public function addAttachment(string $filePath): void
+    public function addAttachment($filePath)
     {
         if (!file_exists($filePath)) {
             throw new Exception("Attached file doesn't exist!");
@@ -130,7 +130,7 @@ class Message
     /**
      * Sends mail to recipients
      */
-    public function send(): void
+    public function send()
     {
         if (empty($this->to)) {
             throw new Exception("You must add at least one recipient to mail message!");
@@ -149,7 +149,7 @@ class Message
      * @param string $separator Separator to use in case attachments are sent
      * @return array Headers to send
      */
-    private function getHeaders(string $separator): array
+    private function getHeaders($separator)
     {
         $headers = array();
         if (!empty($this->attachments)) {
@@ -190,7 +190,7 @@ class Message
      * @param string $separator Separator to use in case attachments are sent
      * @return string Message body to send.
      */
-    private function getBody(string $separator): string
+    private function getBody($separator)
     {
         $body = "";
         if (!empty($this->attachments)) {

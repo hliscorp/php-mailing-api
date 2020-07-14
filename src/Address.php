@@ -16,7 +16,7 @@ class Address
      * @param string|NULL $name
      * @throws Exception
      */
-    public function __construct(string $email, ?string $name=null)
+    public function __construct($email, $name=null)
     {
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new Exception("Email address is invalid!");
@@ -30,7 +30,7 @@ class Address
      *
      * @return string
      */
-    public function __toString(): string
+    public function __toString()
     {
         if ($this->name) {
             return $this->name." <".$this->email.">";
