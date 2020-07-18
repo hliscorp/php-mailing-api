@@ -6,14 +6,18 @@ namespace Lucinda\Mail;
  */
 class Message
 {
-    private $subject;
+    private $subject = "";
     private $to = array();
     private $from;
     private $sender;
     private $replyTo;
     private $cc = array();
     private $bcc = array();
+    private $date;
+    private $messageID;
+    private $unsubscribe = array();
     private $customHeaders = array();
+    private $dkim;
     
     private $contentType;
     private $charset;
@@ -21,7 +25,8 @@ class Message
     private $attachments = array();
 
     /**
-     * MailMessage constructor.
+     * Message constructor.
+     *
      * @param string $subject Subject of email.
      * @param string $body Email body.
      */
@@ -102,7 +107,53 @@ class Message
         $this->contentType = $contentType;
         $this->charset = $charset;
     }
-
+    
+    /**
+     * Sets custom date of message
+     *
+     * @param int $unixTime
+     */
+    public function setDate($unixTime)
+    {
+        $this->date = $unixTime;
+    }
+    
+    /**
+     * Sets message ID header based on your domain name
+     *
+     * @param string $domainName
+     */
+    public function setMessageID($domainName)
+    {
+        $this->messageID = md5(uniqid("msgid-"))."@".$domainName;
+    }
+    
+    /**
+     * Sets email/url to be used/clicked if target wants to unsubscribe
+     *
+     * @param string $email
+     * @param string $url
+     * @throws Exception
+     */
+    public function setUnsubscribeInfo($email=null, $url=null)
+    {
+        if (!$email && !$url) {
+            throw new Exception("You must set either an email or an url!");
+        }
+        if ($email) {
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                throw new Exception("Email address is invalid!");
+            }
+            $this->unsubscribe[] = $email;
+        }
+        if ($url) {
+            if (!filter_var($url, FILTER_VALIDATE_URL)) {
+                throw new Exception("Url is invalid!");
+            }
+            $this->unsubscribe[] = $url;
+        }
+    }
+    
     /**
      * Adds custom mail header
      *
@@ -126,6 +177,21 @@ class Message
         }
         $this->attachments[] = $filePath;
     }
+    // Selector used in your DKIM DNS record, e.g. : selector._domainkey.MAIL_DKIM_DOMAIN
+    
+    /**
+     * Sets a DKIM-Signature header to vouch for domain name authenticity
+     *
+     * @param string $rsaPrivateKey RSA private key
+     * @param string $rsaPassphrase RSA passphrase
+     * @param string $domainName Domain name
+     * @param string $dnsSelector DNS selector (http://knowledge.ondmarc.redsift.com/en/articles/2137267-what-is-a-dkim-selector#:~:text=A%20DKIM%20selector%20is%20a,technical%20headers%20of%20an%20email.)
+     * @param string[] $signedHeaders Headers names to sign request with (MUST EXIST!)
+     */
+    public function setDKIMSignature($rsaPrivateKey, $rsaPassphrase, $domainName, $dnsSelector, $signedHeaders)
+    {
+        $this->dkim = new DKIM($rsaPrivateKey, $rsaPassphrase, $domainName, $dnsSelector, $signedHeaders);
+    }
 
     /**
      * Sends mail to recipients
@@ -137,7 +203,16 @@ class Message
         }
         
         $separator = md5(uniqid(time()));
-        $result = mail(implode(",", $this->to), $this->subject, $this->getBody($separator), implode("\r\n", $this->getHeaders($separator)));
+        $to = implode(",", $this->to);
+        $body = $this->getBody($separator);
+        $headers = $this->getHeaders($separator);
+                
+        // apply DKIM signature to entire message, if available
+        if ($this->dkim) {
+            $headers = $this->dkim->getSignature($to, $this->subject, $body, $headers).$headers;
+        }
+        
+        $result = mail($to, $this->subject, $body, $headers);
         if (!$result) {
             throw new Exception("Send failed!");
         }
@@ -146,7 +221,8 @@ class Message
     /**
      * Compiles email headers to send
      *
-     * @param string $separator Separator to use in case attachments are sent
+     * @param string $separator Separator to use in case attachments are sent     *
+     * @param string $body Email message body.
      * @return array Headers to send
      */
     private function getHeaders($separator)
@@ -162,6 +238,14 @@ class Message
                 $headers[] = "MIME-Version: 1.0";
                 $headers[] = "Content-type:".$this->contentType."; charset=\"".$this->charset."\"";
             }
+        }
+        $headers[] = "Date: ".date("r (T)", ($this->date?$this->date:time()));
+        if ($this->messageID) {
+            $headers[] = "Message-ID: ".$this->messageID;
+        }
+        if (!empty($this->unsubscribe)) {
+            $headers[] = "List-Unsubscribe: ".("<".implode(">, <", $this->unsubscribe).">");
+            $headers[] = "List-Unsubscribe-Post: List-Unsubscribe=One-Click";
         }
         if (!empty($this->from)) {
             $headers[] = "From: ".$this->from;
@@ -181,7 +265,8 @@ class Message
         if (!empty($this->customHeaders)) {
             $headers = array_merge($headers, $this->customHeaders);
         }
-        return $headers;
+        
+        return implode("\r\n", $headers);
     }
     
     /**
@@ -192,15 +277,15 @@ class Message
      */
     private function getBody($separator)
     {
-        $body = "";
+        $body = preg_replace('/(?<!\r)\n/', "\r\n", $this->message);
         if (!empty($this->attachments)) {
             $bodyParts = array();
             
             // add message body
             $bodyParts[] = "--".$separator;
-            $bodyParts[] = "Content-Type: ".($this->contentType?$this->contentType:"text/plain")."; charset=\"".($this->charset?$this->charset:"iso-8859-1")."\"";
+            $bodyParts[] = "Content-Type: ".$this->contentType."; charset=\"".$this->charset."\"";
             $bodyParts[] = "Content-Transfer-Encoding: 8bit";
-            $bodyParts[] = $this->message;
+            $bodyParts[] = $body;
             
             // add attachments
             foreach ($this->attachments as $filePath) {
@@ -212,8 +297,6 @@ class Message
             }
             $bodyParts[] = "--".$separator."--";
             $body = implode("\r\n", $bodyParts);
-        } else {
-            $body = $this->message;
         }
         return $body;
     }
