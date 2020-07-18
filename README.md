@@ -1,6 +1,6 @@
 # php-mailing-api
 
-Very light weight PHP API covering most important parts of [RFC-5322](https://tools.ietf.org/html/rfc5322) identified by [RFC-2076](https://tools.ietf.org/html/rfc2076) specifications, the worldwide standards at this moment for email sending.
+Very light weight PHP API covering most important parts of [RFC-4021](https://tools.ietf.org/html/rfc4021), the worldwide standard at this moment for email sending, along with [RFC-6376](https://tools.ietf.org/html/rfc6376) for digital signatures.
 
 It comes with just three classes, all belonging to Lucinda\Mail namespace:
 
@@ -24,7 +24,6 @@ The entire logic of email message is encapsulated by class **[Message](https://g
 | [setContentType](#setContentType) | Sets message body content type (**strongly recommended**) |
 | [setDate](#setDate) | Sets time message was sent at as date header |
 | [setMessageID](#setMessageID) | Sets domain name in order to generate a message ID (**strongly recommended**) |
-| [setListUnsubscribe](#setListUnsubscribe) | Sets email and/or url for automatic unsubscription, useful for mailing lists |
 | [setSignature](#setSignature) | Sets a DKIM-Signature header is to be generated (**strongly recommended**)  |
 | [addCustomHeader](#addCustomHeader) | Sets a custom header to send in email message |
 | [send](#send) | Sends message to destination |
@@ -58,6 +57,12 @@ Adds an attachment to message body based on argument:
 | --- | --- | --- |
 | $path | string | Absolute disk path of file to be attached. |
 
+Example:
+
+```php
+$message->addAttachment("/foo/bar/baz.jpg");
+```
+
 ## setFrom<a href="setFrom"></a>
 
 Sets address of message author as seen by recipients (see: [from](https://tools.ietf.org/html/rfc4021#section-2.1.2) header) based on argument:
@@ -67,6 +72,12 @@ Sets address of message author as seen by recipients (see: [from](https://tools.
 | $address | Address | Address that appears as message author |
 
 Usually calling this method is not necessary, unless developer wants a different *from* address from that default.
+
+Example:
+
+```php
+$message->setFrom(new \Lucinda\Mail\Address("sender@example.com", "Example.com Team"));
+```
 
 ## setSender<a href="setSender"></a>
 
@@ -78,6 +89,12 @@ Sets address of message author as seen by destination mail server (see: [from](h
 
 Should be same as *from* address, unless mail server is sending messages on behalf of someone else.
 
+Example:
+
+```php
+$message->setSender(new \Lucinda\Mail\Address("sender@example.com", "Example.com Team"));
+```
+
 ## setReplyTo<a href="setReplyTo"></a>
 
 Sets address to send message replies to (see: [Reply-To](https://tools.ietf.org/html/rfc4021#section-2.1.4) header) based on argument:
@@ -87,6 +104,12 @@ Sets address to send message replies to (see: [Reply-To](https://tools.ietf.org/
 | $address | Address | Address to send reply to |
 
 Should always be set IF we desire messages to be replied to.
+
+Example:
+
+```php
+$message->setReplyTo(new \Lucinda\Mail\Address("sender@example.com", "Example.com Team"));
+```
 
 ## addTo<a href="addTo"></a>
 
@@ -98,6 +121,12 @@ Adds an address to send message to (see: [To](https://tools.ietf.org/html/rfc402
 
 At least one address must always be set!
 
+Example:
+
+```php
+$message->addTo(new \Lucinda\Mail\Address("destination@server.com"));
+```
+
 ## addCC<a href="addCC"></a>
 
 Adds an address to send a copy of message to allowing others to notice (see: [Cc](https://tools.ietf.org/html/rfc4021#section-2.1.6) header) based on argument:
@@ -105,6 +134,12 @@ Adds an address to send a copy of message to allowing others to notice (see: [Cc
 | Name | Type | Description |
 | --- | --- | --- |
 | $address | Address | Address to send copy of message to |
+
+Example:
+
+```php
+$message->addCC(new \Lucinda\Mail\Address("destination@server.com"));
+```
 
 ## addBCC<a href="addBCC"></a>
 
@@ -114,6 +149,12 @@ Adds an address to send a copy of message to without others to notice (see: [Bcc
 | --- | --- | --- |
 | $address | Address | Address to send copy of message to |
 
+Example:
+
+```php
+$message->addBCC(new \Lucinda\Mail\Address("destination@server.com"));
+```
+
 ## setContentType<a href="setContentType"></a>
 
 Sets message body's content type and character set by following arguments (see: [Content-Type](https://tools.ietf.org/html/rfc4021#section-2.2.5) header):
@@ -122,6 +163,12 @@ Sets message body's content type and character set by following arguments (see: 
 | --- | --- | --- |
 | $contentType | string | Message body content type |
 | $charset | string | Character set of message body |
+
+Example:
+
+```php
+$message->setContentType("text/html", "UTF-8");
+```
 
 ## setDate<a href="setDate"></a>
 
@@ -133,6 +180,12 @@ Sets custom date message was sent at based on argument (see: [Date](https://tool
 
 Usually it is not necessary to send this header unless you want to trick receiver(s) it originated at a different date.
 
+Example:
+
+```php
+$message->setDate(time()-1000);
+```
+
 ## setMessageID<a href="setMessageID"></a>
 
 Sets unique ID of message to send based on argument (see: [Message-ID](https://tools.ietf.org/html/rfc4021#section-2.1.8) header):
@@ -143,22 +196,11 @@ Sets unique ID of message to send based on argument (see: [Message-ID](https://t
 
 It is **strongly recommended** to send this header in order to prevent having your message labeled as spam by recipient mail servers!
 
-## setListUnsubscribe<a href="setListUnsubscribe"></a>
+Example:
 
-Sets email or url to be used by recipients to unsubscribe from mailing list message originated from (see: [List-Unsubscribe](https://tools.ietf.org/html/rfc4021#section-2.1.37) header) based on arguments:
-
-
-| Name | Type | Description |
-| --- | --- | --- |
-| $email | string | Email that notifies automatic unsubscription. |
-| $url | string | URL to notify automatic unsubscription. |
-
-Setting this header is **mandatory if message originates from a mailing list**, a requirement to prevent your message labeled as spam. When sent, recipient will see an "unsubscribe" button in  email received that once clicked:
-
-- generates a hidden email to target address
-- sends a hidden POST request to target url using parameters *List-Unsubscribe=One-Click*
-
-For more info on this header and how it works, check out [this article](https://www.postmastery.com/list-unsubscribe-header-critical-for-sustained-email-delivery/#:~:text=The%20List%2DUnsubscribe%20is%20an,mailto%3Alink%20in%20the%20email.)
+```php
+$message->setMessageID("example.com");
+```
 
 ## setSignature<a href="setSignature"></a>
 
@@ -185,15 +227,40 @@ In order to prevent having your message labeled as spam by recipient mail server
 
 The algorithm used in generating DKIM-Signature header has been taken from [php-mail-signature](https://github.com/louisameline/php-mail-signature) and refactored completely because original was chaotic and poorly programmed. The end result was class [DKIM](https://github.com/aherne/php-mailing-api/blob/master/src/DKIM.php)!
 
+Example:
+
+```php
+$message->setSignature("-----BEGIN RSA PRIVATE KEY----- ... -----END RSA PRIVATE KEY-----", "", "example.com", "dkim", [
+    "From",
+    "Reply-To",
+    "Subject",
+    "To"
+]);
+```
+
 ## addCustomHeader<a href="addCustomHeader"></a>
 
-Adds a RFC header not covered by commands above using following arguments:
+Adds a [RFC-4021](https://tools.ietf.org/html/rfc4021) header not covered by commands above using following arguments:
 
 | Name | Type | Description |
 | --- | --- | --- |
 | $name | string | Name of header |
 | $value | string | Value of header |
 
+Example:
+
+```php
+$message->addCustomHeader("List-Unsubscribe", "<mailto: unsubscribe@example.com>");
+```
+
+Above command adds a [List-Unsubscribe](https://tools.ietf.org/html/rfc4021#section-2.1.37) header  which allows users to unsubscribe from mailing lists by a button click.
+
 ## send<a href="send"></a>
 
 Packs message body and headers, compiles latter with DKIM-Signature (if available) and sends mail to destination.
+
+Example:
+
+```php
+$messag->send();
+```

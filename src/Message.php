@@ -15,7 +15,6 @@ class Message
     private $bcc = array();
     private $date;
     private $messageID;
-    private $unsubscribe = array();
     private $customHeaders = array();
     private $dkim;
     
@@ -129,32 +128,6 @@ class Message
     }
     
     /**
-     * Sets email/url to be used/clicked if target wants to unsubscribe
-     *
-     * @param string $email
-     * @param string $url
-     * @throws Exception
-     */
-    public function setListUnsubscribe($email=null, $url=null)
-    {
-        if (!$email && !$url) {
-            throw new Exception("You must set either an email or an url!");
-        }
-        if ($email) {
-            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                throw new Exception("Email address is invalid!");
-            }
-            $this->unsubscribe[] = "mailto:".$email;
-        }
-        if ($url) {
-            if (!filter_var($url, FILTER_VALIDATE_URL)) {
-                throw new Exception("Url is invalid!");
-            }
-            $this->unsubscribe[] = $url;
-        }
-    }
-    
-    /**
      * Adds custom mail header
      *
      * @param string $name Value of header name.
@@ -206,8 +179,6 @@ class Message
         $to = implode(",", $this->to);
         $body = $this->getBody($separator);
         $headers = $this->getHeaders($separator);
-                
-        // apply DKIM signature to entire message, if available
         if ($this->dkim) {
             $headers = $this->dkim->getSignature($to, $this->subject, $body, $headers).$headers;
         }
@@ -228,24 +199,19 @@ class Message
     private function getHeaders($separator)
     {
         $headers = array();
+        $headers[] = "MIME-Version: 1.0";
         if (!empty($this->attachments)) {
-            $headers[] = "MIME-Version: 1.0";
             $headers[] = "Content-Type: multipart/mixed; boundary=\"".$separator."\"";
             $headers[] = "Content-Transfer-Encoding: 7bit";
             $headers[] = "This is a MIME encoded message";
         } else {
             if ($this->contentType) {
-                $headers[] = "MIME-Version: 1.0";
                 $headers[] = "Content-type:".$this->contentType."; charset=\"".$this->charset."\"";
             }
         }
         $headers[] = "Date: ".date("r (T)", ($this->date?$this->date:time()));
         if ($this->messageID) {
             $headers[] = "Message-ID: ".$this->messageID;
-        }
-        if (!empty($this->unsubscribe)) {
-            $headers[] = "List-Unsubscribe: ".("<".implode(">, <", $this->unsubscribe).">");
-            $headers[] = "List-Unsubscribe-Post: List-Unsubscribe=One-Click";
         }
         if (!empty($this->from)) {
             $headers[] = "From: ".$this->from;
@@ -290,8 +256,10 @@ class Message
             // add attachments
             foreach ($this->attachments as $filePath) {
                 $bodyParts[] = "--".$separator;
+                $bodyParts[] = "Content-ID: ".sha1($filePath);
                 $bodyParts[] = "Content-Type: ".mime_content_type($filePath)."; name=\"".basename($filePath) ."\"";
                 $bodyParts[] = "Content-Transfer-Encoding: base64";
+                $bodyParts[] = "Content-Description: ".basename($filePath);
                 $bodyParts[] = "Content-Disposition: attachment";
                 $bodyParts[] = chunk_split(base64_encode(file_get_contents($filePath)));
             }
