@@ -135,7 +135,7 @@ class Message
      * @param string $url
      * @throws Exception
      */
-    public function setUnsubscribeInfo($email=null, $url=null)
+    public function setListUnsubscribe($email=null, $url=null)
     {
         if (!$email && !$url) {
             throw new Exception("You must set either an email or an url!");
@@ -144,7 +144,7 @@ class Message
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 throw new Exception("Email address is invalid!");
             }
-            $this->unsubscribe[] = $email;
+            $this->unsubscribe[] = "mailto:".$email;
         }
         if ($url) {
             if (!filter_var($url, FILTER_VALIDATE_URL)) {
