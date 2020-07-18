@@ -5,7 +5,7 @@ Very light weight PHP API covering most important parts of [RFC-4021](https://to
 It comes with just three classes, all belonging to Lucinda\Mail namespace:
 
 - [Address](https://github.com/aherne/php-mailing-api/blob/master/src/Address.php): encapsulates an email address, composed by value of email and name of user associated with it 
-- [DKIM](https://github.com/aherne/php-mailing-api/blob/master/src/DKIM.php): creates a DKIM-Signature header [RFC6376] based on a heavily refactored version of [php-mail-signature](https://github.com/louisameline/php-mail-signature) class
+- [DKIM](https://github.com/aherne/php-mailing-api/blob/master/src/DKIM.php): creates a DKIM-Signature header using on a heavily refactored version of [php-mail-signature](https://github.com/louisameline/php-mail-signature) classes
 - [Exception](https://github.com/aherne/php-mailing-api/blob/master/src/Exception.php): encapsulates any logical error that prevents email from being sent
 - [Message](https://github.com/aherne/php-mailing-api/blob/master/src/Message.php): encapsulates an email message
 
@@ -262,5 +262,5 @@ Packs message body and headers, compiles latter with DKIM-Signature (if availabl
 Example:
 
 ```php
-$messag->send();
+$message->send();
 ```
