@@ -1,4 +1,4 @@
-# php-mailing-api
+# PHP Mailing API
 
 Very light weight PHP API covering most important parts of [RFC-4021](https://tools.ietf.org/html/rfc4021), the worldwide standard at this moment for email sending, along with [RFC-6376](https://tools.ietf.org/html/rfc6376) for digital signatures.
 

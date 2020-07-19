@@ -194,7 +194,7 @@ class Message
      *
      * @param string $separator Separator to use in case attachments are sent     *
      * @param string $body Email message body.
-     * @return array Headers to send
+     * @return string Headers to send
      */
     private function getHeaders(string $separator): string
     {
