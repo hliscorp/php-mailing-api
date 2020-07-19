@@ -21,9 +21,9 @@ class DKIM
      * @param string $passphrase RSA passphrase
      * @param string $domain Domain name
      * @param string $selector DNS selector
-     * @param string $signedHeaders Headers names to sign request with (MUST EXIST!)
+     * @param string[] $signedHeaders Headers names to sign request with (MUST EXIST!)
      */
-    public function __construct($privateKey, $passphrase, $domain, $selector, $signedHeaders)
+    public function __construct(string $privateKey, string $passphrase, string $domain, string $selector, array $signedHeaders)
     {
         $this->privateKey = openssl_pkey_get_private($privateKey, $passphrase);
         $this->domain = $domain;
@@ -46,7 +46,7 @@ class DKIM
      * @throws Exception If a DKIM signature header could not be created
      * @return string DKIM-Signature header name and value
      */
-    public function getSignature($to, $subject, $body, $headers)
+    public function getSignature(string $to, string $subject, string $body, string $headers)
     {                
         // to and subject must exist already
         $headers .= (mb_substr($headers, mb_strlen($headers, 'UTF-8')-2, 2, 'UTF-8') == "\r\n"?'':"\r\n");
@@ -97,7 +97,7 @@ class DKIM
      * @param string $body Body of email message
      * @return string Canonicalized email message body
      */
-    private function canonicalizeBody($body)
+    private function canonicalizeBody(string $body)
     {
         // relaxed canonicalization
         $lines = explode("\r\n", $body);
@@ -129,7 +129,7 @@ class DKIM
      * @param string $sHeaders List of headers to send in email
      * @return string[] Headers canonicalized and converted to array
      */
-    private function canonicalizeHeaders($sHeaders)
+    private function canonicalizeHeaders(string $sHeaders)
     {
         $aHeaders = array();
         

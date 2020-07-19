@@ -29,7 +29,7 @@ class Message
      * @param string $subject Subject of email.
      * @param string $body Email body.
      */
-    public function __construct($subject, $body)
+    public function __construct(string $subject, string $body)
     {
         $this->subject = $subject;
         $this->message = $body;
@@ -40,7 +40,7 @@ class Message
      *
      * @param Address $address Value of email and optional name of person email belongs to
      */
-    public function addTo(Address $address)
+    public function addTo(Address $address): void
     {
         $this->to[] = $address;
     }
@@ -50,7 +50,7 @@ class Message
      *
      * @param Address $address Value of email and optional name of person email belongs to
      */
-    public function setFrom(Address $address)
+    public function setFrom(Address $address): void
     {
         $this->from = $address;
     }
@@ -60,7 +60,7 @@ class Message
      *
      * @param Address $address Value of email and optional name of person email belongs to
      */
-    public function setSender(Address $address)
+    public function setSender(Address $address): void
     {
         $this->sender = $address;
     }
@@ -70,7 +70,7 @@ class Message
      *
      * @param Address $address Value of email and optional name of person email belongs to
      */
-    public function setReplyTo(Address $address)
+    public function setReplyTo(Address $address): void
     {
         $this->replyTo = $address;
     }
@@ -101,7 +101,7 @@ class Message
      * @param string $contentType
      * @param string $charset
      */
-    public function setContentType($contentType, $charset)
+    public function setContentType(string $contentType, string $charset): void
     {
         $this->contentType = $contentType;
         $this->charset = $charset;
@@ -112,7 +112,7 @@ class Message
      *
      * @param int $unixTime
      */
-    public function setDate($unixTime)
+    public function setDate(int $unixTime): void
     {
         $this->date = $unixTime;
     }
@@ -122,7 +122,7 @@ class Message
      *
      * @param string $domainName
      */
-    public function setMessageID($domainName)
+    public function setMessageID(string $domainName): void
     {
         $this->messageID = md5(uniqid("msgid-"))."@".$domainName;
     }
@@ -133,7 +133,7 @@ class Message
      * @param string $name Value of header name.
      * @param string $value Value of header content.
      */
-    public function addCustomHeader($name, $value)
+    public function addCustomHeader(string $name, string $value): void
     {
         $this->customHeaders[] = $name.": ".$value;
     }
@@ -143,7 +143,7 @@ class Message
      *
      * @param string $filePath Location of attached file
      */
-    public function addAttachment($filePath)
+    public function addAttachment(string $filePath): void
     {
         if (!file_exists($filePath)) {
             throw new Exception("Attached file doesn't exist!");
@@ -161,7 +161,7 @@ class Message
      * @param string $dnsSelector DNS selector (http://knowledge.ondmarc.redsift.com/en/articles/2137267-what-is-a-dkim-selector#:~:text=A%20DKIM%20selector%20is%20a,technical%20headers%20of%20an%20email.)
      * @param string[] $signedHeaders Headers names to sign request with (MUST EXIST!)
      */
-    public function setDKIMSignature($rsaPrivateKey, $rsaPassphrase, $domainName, $dnsSelector, $signedHeaders)
+    public function setSignature(string $rsaPrivateKey, string $rsaPassphrase, string $domainName, string $dnsSelector, array $signedHeaders): void
     {
         $this->dkim = new DKIM($rsaPrivateKey, $rsaPassphrase, $domainName, $dnsSelector, $signedHeaders);
     }
@@ -169,7 +169,7 @@ class Message
     /**
      * Sends mail to recipients
      */
-    public function send()
+    public function send(): void
     {
         if (empty($this->to)) {
             throw new Exception("You must add at least one recipient to mail message!");
@@ -196,7 +196,7 @@ class Message
      * @param string $body Email message body.
      * @return array Headers to send
      */
-    private function getHeaders($separator)
+    private function getHeaders(string $separator): string
     {
         $headers = array();
         $headers[] = "MIME-Version: 1.0";
@@ -241,7 +241,7 @@ class Message
      * @param string $separator Separator to use in case attachments are sent
      * @return string Message body to send.
      */
-    private function getBody($separator)
+    private function getBody(string $separator): string
     {
         $body = preg_replace('/(?<!\r)\n/', "\r\n", $this->message);
         if (!empty($this->attachments)) {
