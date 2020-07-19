@@ -4,12 +4,12 @@ Very light weight PHP API covering most important parts of [RFC-4021](https://to
 
 It comes with just three classes, all belonging to Lucinda\Mail namespace:
 
-- [Address](https://github.com/aherne/php-mailing-api/blob/master/src/Address.php): encapsulates an email address, composed by value of email and name of user associated with it 
-- [DKIM](https://github.com/aherne/php-mailing-api/blob/master/src/DKIM.php): creates a DKIM-Signature header using on a heavily refactored version of [php-mail-signature](https://github.com/louisameline/php-mail-signature) classes
-- [Exception](https://github.com/aherne/php-mailing-api/blob/master/src/Exception.php): encapsulates any logical error that prevents email from being sent
-- [Message](https://github.com/aherne/php-mailing-api/blob/master/src/Message.php): encapsulates an email message
+- [Address](https://github.com/aherne/php-mailing-api/blob/old/src/Address.php): encapsulates an email address, composed by value of email and name of user associated with it 
+- [DKIM](https://github.com/aherne/php-mailing-api/blob/old/src/DKIM.php): creates a DKIM-Signature header using on a heavily refactored version of [php-mail-signature](https://github.com/louisameline/php-mail-signature) classes
+- [Exception](https://github.com/aherne/php-mailing-api/blob/old/src/Exception.php): encapsulates any logical error that prevents email from being sent
+- [Message](https://github.com/aherne/php-mailing-api/blob/old/src/Message.php): encapsulates an email message
 
-The entire logic of email message is encapsulated by class **[Message](https://github.com/aherne/php-mailing-api/blob/master/src/Message.php)** via following public methods:
+The entire logic of email message is encapsulated by class **[Message](https://github.com/aherne/php-mailing-api/blob/old/src/Message.php)** via following public methods:
 
 | Method | Description |
 | --- | --- |
@@ -225,7 +225,7 @@ In order to prevent having your message labeled as spam by recipient mail server
 - Since you generated a key without a password **$rsaPassphrase** will always be an empty ""
 - Now finally you must choose list of header names to generate signature from (eg: ["From", "Message-ID", "Content-Type"]) using **$signedHeaders**. See: [recommendations](http://dkim.org/specs/rfc4871-dkimbase.html#choosing-header-fields) for what should be chosen!
 
-The algorithm used in generating DKIM-Signature header has been taken from [php-mail-signature](https://github.com/louisameline/php-mail-signature) and refactored completely because original was chaotic and poorly programmed. The end result was class [DKIM](https://github.com/aherne/php-mailing-api/blob/master/src/DKIM.php)!
+The algorithm used in generating DKIM-Signature header has been taken from [php-mail-signature](https://github.com/louisameline/php-mail-signature) and refactored completely because original was chaotic and poorly programmed. The end result was class [DKIM](https://github.com/aherne/php-mailing-api/blob/old/src/DKIM.php)!
 
 Example:
 

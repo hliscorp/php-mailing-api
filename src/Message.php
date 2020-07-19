@@ -161,7 +161,7 @@ class Message
      * @param string $dnsSelector DNS selector (http://knowledge.ondmarc.redsift.com/en/articles/2137267-what-is-a-dkim-selector#:~:text=A%20DKIM%20selector%20is%20a,technical%20headers%20of%20an%20email.)
      * @param string[] $signedHeaders Headers names to sign request with (MUST EXIST!)
      */
-    public function setDKIMSignature($rsaPrivateKey, $rsaPassphrase, $domainName, $dnsSelector, $signedHeaders)
+    public function setSignature($rsaPrivateKey, $rsaPassphrase, $domainName, $dnsSelector, $signedHeaders)
     {
         $this->dkim = new DKIM($rsaPrivateKey, $rsaPassphrase, $domainName, $dnsSelector, $signedHeaders);
     }
