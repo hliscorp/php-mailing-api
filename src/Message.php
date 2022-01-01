@@ -6,22 +6,22 @@ namespace Lucinda\Mail;
  */
 class Message
 {
-    private $subject = "";
-    private $to = array();
-    private $from;
-    private $sender;
-    private $replyTo;
-    private $cc = array();
-    private $bcc = array();
-    private $date;
-    private $messageID;
-    private $customHeaders = array();
-    private $dkim;
+    private string $subject;
+    private string $message;
+    private array $to = array();
+    private ?Address $from = null;
+    private ?Address $sender = null;
+    private ?Address $replyTo = null;
+    private array $cc = array();
+    private array $bcc = array();
+    private ?int $date = null;
+    private ?string $messageID = null;
+    private array $customHeaders = array();
+    private ?DKIM $dkim = null;
     
-    private $contentType;
-    private $charset;
-    private $message;
-    private $attachments = array();
+    private ?string $contentType = null;
+    private ?string $charset = null;
+    private array $attachments = array();
 
     /**
      * Message constructor.
@@ -80,7 +80,7 @@ class Message
      *
      * @param Address $address Value of email and optional name of person email belongs to
      */
-    public function addCC(Address $address)
+    public function addCC(Address $address): void
     {
         $this->cc[] = $address;
     }
@@ -90,7 +90,7 @@ class Message
      *
      * @param Address $address Value of email and optional name of person email belongs to
      */
-    public function addBCC(Address $address)
+    public function addBCC(Address $address): void
     {
         $this->bcc[] = $address;
     }
@@ -142,6 +142,7 @@ class Message
      * Adds attachment
      *
      * @param string $filePath Location of attached file
+     * @throws Exception
      */
     public function addAttachment(string $filePath): void
     {
@@ -150,7 +151,6 @@ class Message
         }
         $this->attachments[] = $filePath;
     }
-    // Selector used in your DKIM DNS record, e.g. : selector._domainkey.MAIL_DKIM_DOMAIN
     
     /**
      * Sets a DKIM-Signature header to vouch for domain name authenticity
@@ -168,6 +168,7 @@ class Message
 
     /**
      * Sends mail to recipients
+     * @throws Exception
      */
     public function send(): void
     {
@@ -192,8 +193,7 @@ class Message
     /**
      * Compiles email headers to send
      *
-     * @param string $separator Separator to use in case attachments are sent     *
-     * @param string $body Email message body.
+     * @param string $separator Separator to use in case attachments are sent
      * @return string Headers to send
      */
     private function getHeaders(string $separator): string

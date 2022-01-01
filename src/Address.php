@@ -4,10 +4,10 @@ namespace Lucinda\Mail;
 /**
  * Class that encapsulates an email address along with its optional owner name
  */
-class Address
+class Address implements \Stringable
 {
-    private $email;
-    private $name;
+    private string $email;
+    private ?string $name = null;
 
     /**
      * Registers and validates email address along with its optional owner name

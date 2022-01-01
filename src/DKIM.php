@@ -8,11 +8,11 @@ namespace Lucinda\Mail;
 class DKIM
 {
     const DKIM_HASH = "sha256";
-    
-    private $privateKey;
-    private $domain;
-    private $selector;
-    private $signedHeaders;
+
+    private string $privateKey;
+    private string $domain;
+    private string $selector;
+    private array $signedHeaders = [];
     
     /**
      * Sets up necessary ingredients for DKIM generation before headers/subject/body are set
@@ -46,7 +46,7 @@ class DKIM
      * @throws Exception If a DKIM signature header could not be created
      * @return string DKIM-Signature header name and value
      */
-    public function getSignature(string $to, string $subject, string $body, string $headers)
+    public function getSignature(string $to, string $subject, string $body, string $headers): string
     {                
         // to and subject must exist already
         $headers .= (mb_substr($headers, mb_strlen($headers, 'UTF-8')-2, 2, 'UTF-8') == "\r\n"?'':"\r\n");
@@ -97,7 +97,7 @@ class DKIM
      * @param string $body Body of email message
      * @return string Canonicalized email message body
      */
-    private function canonicalizeBody(string $body)
+    private function canonicalizeBody(string $body): string
     {
         // relaxed canonicalization
         $lines = explode("\r\n", $body);
@@ -129,7 +129,7 @@ class DKIM
      * @param string $sHeaders List of headers to send in email
      * @return string[] Headers canonicalized and converted to array
      */
-    private function canonicalizeHeaders(string $sHeaders)
+    private function canonicalizeHeaders(string $sHeaders): array
     {
         $aHeaders = array();
         
