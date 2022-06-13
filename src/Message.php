@@ -1,4 +1,5 @@
 <?php
+
 namespace Lucinda\Mail;
 
 /**
@@ -8,26 +9,41 @@ class Message
 {
     private string $subject;
     private string $message;
+    /**
+     * @var Address[]
+     */
     private array $to = array();
     private ?Address $from = null;
     private ?Address $sender = null;
     private ?Address $replyTo = null;
+    /**
+     * @var Address[]
+     */
     private array $cc = array();
+    /**
+     * @var Address[]
+     */
     private array $bcc = array();
     private ?int $date = null;
     private ?string $messageID = null;
+    /**
+     * @var string[]
+     */
     private array $customHeaders = array();
     private ?DKIM $dkim = null;
-    
+
     private ?string $contentType = null;
     private ?string $charset = null;
+    /**
+     * @var string[]
+     */
     private array $attachments = array();
 
     /**
      * Message constructor.
      *
      * @param string $subject Subject of email.
-     * @param string $body Email body.
+     * @param string $body    Email body.
      */
     public function __construct(string $subject, string $body)
     {
@@ -106,7 +122,7 @@ class Message
         $this->contentType = $contentType;
         $this->charset = $charset;
     }
-    
+
     /**
      * Sets custom date of message
      *
@@ -116,7 +132,7 @@ class Message
     {
         $this->date = $unixTime;
     }
-    
+
     /**
      * Sets message ID header based on your domain name
      *
@@ -126,11 +142,11 @@ class Message
     {
         $this->messageID = md5(uniqid("msgid-"))."@".$domainName;
     }
-    
+
     /**
      * Adds custom mail header
      *
-     * @param string $name Value of header name.
+     * @param string $name  Value of header name.
      * @param string $value Value of header content.
      */
     public function addCustomHeader(string $name, string $value): void
@@ -141,7 +157,7 @@ class Message
     /**
      * Adds attachment
      *
-     * @param string $filePath Location of attached file
+     * @param  string $filePath Location of attached file
      * @throws Exception
      */
     public function addAttachment(string $filePath): void
@@ -151,23 +167,29 @@ class Message
         }
         $this->attachments[] = $filePath;
     }
-    
+
     /**
      * Sets a DKIM-Signature header to vouch for domain name authenticity
      *
-     * @param string $rsaPrivateKey RSA private key
-     * @param string $rsaPassphrase RSA passphrase
-     * @param string $domainName Domain name
-     * @param string $dnsSelector DNS selector (http://knowledge.ondmarc.redsift.com/en/articles/2137267-what-is-a-dkim-selector#:~:text=A%20DKIM%20selector%20is%20a,technical%20headers%20of%20an%20email.)
+     * @param string   $rsaPrivateKey RSA private key
+     * @param string   $rsaPassphrase RSA passphrase
+     * @param string   $domainName    Domain name
+     * @param string   $dnsSelector   DNS selector (https://knowledge.ondmarc.redsift.com/en/articles/2137267-what-is-a-dkim-selector)
      * @param string[] $signedHeaders Headers names to sign request with (MUST EXIST!)
      */
-    public function setSignature(string $rsaPrivateKey, string $rsaPassphrase, string $domainName, string $dnsSelector, array $signedHeaders): void
-    {
+    public function setSignature(
+        string $rsaPrivateKey,
+        string $rsaPassphrase,
+        string $domainName,
+        string $dnsSelector,
+        array $signedHeaders
+    ): void {
         $this->dkim = new DKIM($rsaPrivateKey, $rsaPassphrase, $domainName, $dnsSelector, $signedHeaders);
     }
 
     /**
      * Sends mail to recipients
+     *
      * @throws Exception
      */
     public function send(): void
@@ -175,7 +197,7 @@ class Message
         if (empty($this->to)) {
             throw new Exception("You must add at least one recipient to mail message!");
         }
-        
+
         $separator = md5(uniqid(time()));
         $to = implode(",", $this->to);
         $body = $this->getBody($separator);
@@ -183,17 +205,17 @@ class Message
         if ($this->dkim) {
             $headers = $this->dkim->getSignature($to, $this->subject, $body, $headers).$headers;
         }
-        
+
         $result = mail($to, $this->subject, $body, $headers);
         if (!$result) {
             throw new Exception("Send failed!");
         }
     }
-    
+
     /**
      * Compiles email headers to send
      *
-     * @param string $separator Separator to use in case attachments are sent
+     * @param  string $separator Separator to use in case attachments are sent
      * @return string Headers to send
      */
     private function getHeaders(string $separator): string
@@ -209,7 +231,7 @@ class Message
                 $headers[] = "Content-type:".$this->contentType."; charset=\"".$this->charset."\"";
             }
         }
-        $headers[] = "Date: ".date("r (T)", ($this->date?$this->date:time()));
+        $headers[] = "Date: ".date("r (T)", ($this->date ? $this->date : time()));
         if ($this->messageID) {
             $headers[] = "Message-ID: ".$this->messageID;
         }
@@ -231,14 +253,14 @@ class Message
         if (!empty($this->customHeaders)) {
             $headers = array_merge($headers, $this->customHeaders);
         }
-        
+
         return implode("\r\n", $headers);
     }
-    
+
     /**
      * Compiles message body to send
      *
-     * @param string $separator Separator to use in case attachments are sent
+     * @param  string $separator Separator to use in case attachments are sent
      * @return string Message body to send.
      */
     private function getBody(string $separator): string
@@ -246,13 +268,13 @@ class Message
         $body = preg_replace('/(?<!\r)\n/', "\r\n", $this->message);
         if (!empty($this->attachments)) {
             $bodyParts = array();
-            
+
             // add message body
             $bodyParts[] = "--".$separator;
             $bodyParts[] = "Content-Type: ".$this->contentType."; charset=\"".$this->charset."\"";
             $bodyParts[] = "Content-Transfer-Encoding: 8bit";
             $bodyParts[] = $body;
-            
+
             // add attachments
             foreach ($this->attachments as $filePath) {
                 $bodyParts[] = "--".$separator;

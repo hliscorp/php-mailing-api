@@ -1,4 +1,5 @@
 <?php
+
 namespace Lucinda\Mail;
 
 /**
@@ -12,8 +13,8 @@ class Address implements \Stringable
     /**
      * Registers and validates email address along with its optional owner name
      *
-     * @param string $email
-     * @param string|NULL $name
+     * @param  string      $email
+     * @param  string|NULL $name
      * @throws Exception
      */
     public function __construct(string $email, ?string $name=null)
