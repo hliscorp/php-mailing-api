@@ -1,5 +1,5 @@
 {
-    "name": "lucinda/mailing",
+    "name": "hlis/mailing",
 	"description" : "Object oriented layer on top of PHP native mail function based on RFC specifications",
 	"type" : "project",
     "homepage": "https://github.com/aherne/php-mailing-api",
