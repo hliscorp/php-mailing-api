@@ -1,5 +1,5 @@
 {
-    "name": "lucinda/mailing",
+    "name": "hlis/mailing",
 	"description" : "Very light weight PHP API for email sending and digital signing covering most important parts of RFC-4021 & RFC-6376 specs",
 	"type" : "library",
     "homepage": "https://github.com/aherne/php-mailing-api",
