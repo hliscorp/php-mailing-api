@@ -1,9 +1,15 @@
 {
-    "name": "hlis/mailing",
-	"description" : "Object oriented layer on top of PHP native mail function based on RFC specifications",
-	"type" : "project",
+    "name": "lucinda/mailing",
+    "description": "Object oriented layer on top of PHP native mail function based on RFC specifications",
+    "type": "project",
     "homepage": "https://github.com/aherne/php-mailing-api",
-    "keywords": ["mailing", "oop","dkim", "dkim signature", "dkim-signature"],
+    "keywords": [
+        "mailing",
+        "oop",
+        "dkim",
+        "dkim signature",
+        "dkim-signature"
+    ],
     "license": "MIT",
     "authors": [
         {
@@ -12,9 +18,9 @@
         }
     ],
     "autoload": {
-    	"psr-4": {
-        	"Lucinda\\Mail\\": "src/"
-    	}
+        "psr-4": {
+            "Lucinda\\Mail\\": "src/"
+        }
     },
     "require": {
         "ext-fileinfo": "*",
