@@ -1,9 +1,15 @@
 {
-    "name": "hlis/mailing",
-	"description" : "Very light weight PHP API for email sending and digital signing covering most important parts of RFC-4021 & RFC-6376 specs",
-	"type" : "library",
+    "name": "lucinda/mailing",
+    "description": "Very light weight PHP API for email sending and digital signing covering most important parts of RFC-4021 & RFC-6376 specs",
+    "type": "library",
     "homepage": "https://github.com/aherne/php-mailing-api",
-    "keywords": ["mailing", "oop","dkim", "dkim signature", "dkim-signature"],
+    "keywords": [
+        "mailing",
+        "oop",
+        "dkim",
+        "dkim signature",
+        "dkim-signature"
+    ],
     "license": "MIT",
     "authors": [
         {
@@ -12,9 +18,9 @@
         }
     ],
     "autoload": {
-    	"psr-4": {
-        	"Lucinda\\Mail\\": "src/"
-    	}
+        "psr-4": {
+            "Lucinda\\Mail\\": "src/"
+        }
     },
     "require": {
         "php": "^8.1",
